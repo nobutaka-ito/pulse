@@ -1,5 +1,15 @@
 # PU learning for audio signal enhancement (PULSE)
-This code is a Pytorch implementation of *PU learning for audio signal enhancement (PULSE)*, a method for audio signal enhancement (SE) proposed in [1]. With this code, you can run speech enhancement experiments using PULSE and train and evaluate speech enhancement models from scratch. If you find this code useful, please cite [1]. 
+This code is a Pytorch implementation of *PU learning for audio signal enhancement (PULSE)*, a method for audio signal enhancement (SE) proposed in ["Audio signal enhancement with learning from positive and unlabelled data"](https://arxiv.org/abs/2210.15143) [1]. With this code, you can run speech enhancement experiments using PULSE and train and evaluate speech enhancement models from scratch. If you find this code useful, please cite [1]:
+```
+@misc{Ito2022arXiv10PULSE,
+  doi = {10.48550/ARXIV.2210.15143},
+  url = {https://arxiv.org/abs/2210.15143},
+  author = {Ito, Nobutaka and Sugiyama, Masashi},
+  title = {Audio Signal Enhancement with Learning from Positive and Unlabelled Data},
+  howpublished = {arXiv},
+  year = {2022},
+}
+```
 
 SE is the task of extracting a desired class of sounds (a "clean signal") while suppressing the other classes of sounds ("noise") from an observed mixture of them (a "noisy signal"). Applications include automatic speech recognition (ASR), music information retrieval, and sound event detection. Although the mainstream SE approach is supervised learning, it is physically impossible to record required parallel training data consisting of both noisy signals and the corresponding clean signals. These data are thus synthesised in practice, which can severely degrade real-world performance due to a data mismatch. In contrast, PULSE enables SE using non-parallel training data consisting of noisy signals and noise, which can be easily recorded in the real world. PULSE is based on a weakly supervised learning framework called *learning from positive and unlabelled data (PU learning)* [2].
 
@@ -102,6 +112,19 @@ srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-t
 
 ### Other options
 For other options, see help by `python pulse.py --help`.
+
+## Citation
+If you find this code useful, please cite [1]:
+```
+@misc{Ito2022arXiv10PULSE,
+  doi = {10.48550/ARXIV.2210.15143},
+  url = {https://arxiv.org/abs/2210.15143},
+  author = {Ito, Nobutaka and Sugiyama, Masashi},
+  title = {Audio Signal Enhancement with Learning from Positive and Unlabelled Data},
+  howpublished = {arXiv},
+  year = {2022},
+}
+```
 
 ## References
 [1] N. Ito and M. Sugiyama, "Audio signal enhancement with learning from positive and unlabelled data," *arXiv*, https://arxiv.org/abs/2210.15143.
