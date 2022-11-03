@@ -65,9 +65,28 @@ Here we explain how to run an experiment using a clean speech dataset of your ow
 Put TIMIT in `pulse/TIMIT/`, which you need to purchase from [LDC](https://catalog.ldc.upenn.edu/LDC93S1). If you wish to use a speech dataset other than TIMIT (or a noise dataset of your choice), put it in `pulse/<dataset name>/`, where `<dataset name>` should be replaced by the name of the dataset.
 
 ### Prepare configuration files
-Configuration files specify the information necessary to synthesise speech enhancement datasets from the speech and the noise datasets, including how to partition data into development, validation, and test sets. For TIMIT, we already prepared `pulse/TIMIT_dev_set.txt`, `pulse/TIMIT_val_set.txt`, and `pulse/TIMIT_test_set.txt` for the development, the validation, and the test sets, respectively. If you wish to use a speech dataset other than TIMIT (or a noise dataset of your choice), you will need to create configuration files by yourself.
+Configuration files specify the information necessary to synthesise speech enhancement datasets from the speech and the noise datasets, including how to partition data into development, validation, and test sets. For the default configuration using TIMIT and DEMAND, we already prepared `pulse/TIMIT_dev_set.txt`, `pulse/TIMIT_val_set.txt`, and `pulse/TIMIT_test_set.txt` for the development, the validation, and the test sets, respectively. If you wish to use a speech dataset other than TIMIT (or a noise dataset of your choice), you will need to create configuration files by yourself.
 
-<!---the clean speech file path, the noise file path for noisy speech data, the starting time of excerpt from the noise file for noisy speech data, the signal-to-noise ratio, the noise file path for noise data, and the starting time of excerpt from the noise file for noise data.--->
+Each line of the configuration file for the development set (e.g., `pulse/TIMIT_dev_set.txt`) specifies the information necessary to synthesise an example in the development set (i.e., a noisy speech example and a noise example in PULSE and MixIT and a noisy speech example and the corresponding clean speech example in supervised learning). Specifically, each line consists of the following six entries separated by a space: 
+1. the file path for the clean speech for generating a noisy signal example,
+1. the file path for the noise for generating a noisy signal example,
+1. the starting time of the noise excerpt for generating a noisy signal example,
+1. the signal-to-noise ratio (SNR) for generating a noisy signal example,
+1. the file path for the noise for generating a noise example,
+1. the starting time of the noise excerpt to be used as a noise example.
+
+Here, the information in 5. and 6. is ignored in supervised learning. The configuration files for the validation and the test sets are the same except that 5. and 6. are not used and thus omitted.
+
+**NB:** When creating the configuration files, one must make sure that the test examples are unseen in the development and the validation sets.
+
+### How data are generated
+Here is how speech enhancement datasets are generated using the speech and the noise datasets and the information in the configuration files. PULSE and MixIT use non-parallel training data consisting of noisy signals and noise, while supervised learning uses parallel training data consisting of noisy signals and the corresponding clean signals. The validation and the test sets are such parallel data in all methods. 
+
+Each example in the development set for PULSE and MixIt is generated according to the following procedure:
+1. Generate a noisy signal example by excerpting a noise segment from the specified noise file and mix it with the specified clean speech at the specified SNR.
+1. Extract a noise example from the specified noise file starting from the specified starting time.
+
+The development set for supervised learning and the validation/test set for all methods are the same except that 2. is omitted.
 
 ### Run an experiment
 The following commands will run an experiment with TIMIT. 
