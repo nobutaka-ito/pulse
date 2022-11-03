@@ -1,5 +1,5 @@
 # PU learning for audio signal enhancement (PULSE)
-This code is a Pytorch implementation of *PU learning for audio signal enhancement (PULSE)*, a method for audio signal enhancement (SE) proposed in ["Audio signal enhancement with learning from positive and unlabelled data"](https://arxiv.org/abs/2210.15143) [1]. With this code, you can run speech enhancement experiments using PULSE and train and evaluate speech enhancement models from scratch. If you find this code useful, please cite [1]:
+This code is a Pytorch implementation of *PU learning for audio signal enhancement (PULSE)*, a method for audio signal enhancement (SE) proposed in ["Audio signal enhancement with learning from positive and unlabelled data"](https://arxiv.org/abs/2210.15143) [1]. With this code, you can run speech enhancement experiments using PULSE and train and evaluate speech enhancement models from scratch. This code also includes implementations of ordinary supervised learning and mixture invariant training (MixIT) [3] as baseline methods. If you find this code useful, please cite [1]:
 ```
 @misc{Ito2022arXiv10PULSE,
   doi = {10.48550/ARXIV.2210.15143},
@@ -11,9 +11,11 @@ This code is a Pytorch implementation of *PU learning for audio signal enhanceme
 }
 ```
 
-SE is the task of extracting a desired class of sounds (a "clean signal") while suppressing the other classes of sounds ("noise") from an observed mixture of them (a "noisy signal"). Applications include automatic speech recognition (ASR), music information retrieval, and sound event detection. Although the mainstream SE approach is supervised learning, it is physically impossible to record required parallel training data consisting of both noisy signals and the corresponding clean signals. These data are thus synthesised in practice, which can severely degrade real-world performance due to a data mismatch. In contrast, PULSE enables SE using non-parallel training data consisting of noisy signals and noise, which can be easily recorded in the real world. PULSE is based on a weakly supervised learning framework called *learning from positive and unlabelled data (PU learning)* [2].
+## What's PULSE?
+SE is the task of extracting a desired class of sounds (a "clean signal") while suppressing the other classes of sounds ("noise") from an observed mixture of them (a "noisy signal"). Applications include automatic speech recognition (ASR), music information retrieval, and sound event detection. Although the mainstream SE approach is supervised learning, it is physically impossible to record required parallel training data consisting of both noisy signals and the corresponding clean signals. These data are thus synthesised in practice, which can severely degrade real-world performance due to a data mismatch. 
 
-This code also includes implementations of ordinary supervised learning and mixture invariant training (MixIT) [3] as baseline methods. 
+In contrast, PULSE enables SE using non-parallel training data consisting of noisy signals and noise, which can be easily recorded in the real world. PULSE is based on a weakly supervised learning framework called *learning from positive and unlabelled data (PU learning)* [2].
+
 
 ## Set up
 ```
@@ -29,7 +31,7 @@ conda activate pulse
 conda install pytorch==1.9.0 torchaudio==0.9.0 scipy==1.7.3 -c pytorch -c conda-forge
 ```
 
-## Quick run
+## Quick start
 Here is how to quickly run a speech enhancement experiment using PULSE with publicly available speech [4] and noise datasets [5]. 
 
 **NB:** This is intended to be a preliminary experiment to show the feasibility of SE using non-parallel training data consisting of noisy signals and noise through PULSE. As such, here we focus on synthetic data created from the speech [4] and the noise datasets [5] instead of real data. This simplifies evaluation because most evaluation metrics for speech enhancement, including scale-invariant SNR (SI-SNR), require parallel data, which cannot be recorded in the real world but can only be synthesised. Evaluation on real data without parallel data using ASR performance or the non-intrusive DNSMOS [6] will be covered in upcoming updates.
