@@ -73,6 +73,21 @@ python pulse.py --method 'MixIT' --lr_per_GPU 0.000034 --dev_fname 'TIMIT_dev_se
 
 Here, the options `dev_fname`, `val_fname`, and `test_fname` specify the paths to the configuration files and the option `clean_path` specifies the directory path of the clean speech dataset (i.e., TIMIT here). (If you also wish to use a noise dataset of your choice, you will also need to specify the directory path of the noise dataset using the option `noise_path`.) The option `fcblocks` is a hyperparameter related to the CNN architecture and `prior` is a hyperparameter in PU learning (specifically the class prior for the positive class), which have already been tuned using the SI-SNRi on the validation set.
 
+## Multi-node processing
+This code supports multi-node data-parallel distributed training using `torch.nn.parallel.DistributedDataParallel` and [Slurm](https://slurm.schedmd.com/documentation.html). Here we show an example of using three NVIDIA DGX nodes with eight A100 GPUs each (i.e., 24 GPUs in total). The options for Slurm `srun` should be changed according to your cluster configuration and `<partition name>` should be replaced with your partition name. (For example, if your nodes are `node[01-03]`, `<partition name>` is `node`.)
+```
+# PULSE
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread -J pulse -o %J_out.txt -e %J_err.txt python pulse.py --dist --prefix '<partition name>' --method 'PU' --lr_per_GPU 0.000037 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 1 --prior 0.7
+
+# Supervised learning
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread -J pulse -o %J_out.txt -e %J_err.txt python pulse.py --dist --prefix '<partition name>' --method 'PN' --lr_per_GPU 0.0002 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 0 --prior 0.7
+
+# MixIT
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread -J pulse -o %J_out.txt -e %J_err.txt python pulse.py --dist --prefix '<partition name>' --method 'MixIT' --lr_per_GPU 0.000034 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 0 --prior 0.7
+```
+You need to pass the options `dist` and `prefix` to pulse.py, where `dist` is a flag and `prefix` specifies the partition name.
+
+
 ## References
 [1] N. Ito and M. Sugiyama, "Audio signal enhancement with learning from positive and unlabelled data," arXiv, https://arxiv.org/abs/2210.15143.
 
