@@ -62,6 +62,17 @@ python pulse.py --method 'MixIT' --lr_per_GPU 0.000034 --blocks 2
 
 Here, the option `--lr_per_GPU` specifies the learning rate per GPU. The option `--blocks` is related to the number of layers, where `--blocks 2` corresponds to a 7-layer CNN and `--blocks 3` to a 9-layer one. These hyperparameters have already been tuned using the SI-SNRi on the validation set.
 
+## Code structure
+`pulse.py` is the entrance of the program. The other files are explained in the following:
+
+- `dataset.py` is used for creating data loaders.
+- `model.py` is used for constructing models.
+- `loss.py` is used for computing losses.
+- `metric.py` is used for computing evaluation metrics.
+- `distributed.py` is used for distributed training.
+- `download.sh` is used for downloading speech and noise datasets.
+- `*_set.txt` are configuration files and used for generating speech enhancement datasets.
+
 ## Using datasets of your own choice
 Here we explain how to run an experiment using a clean speech dataset of your own choice using the TIMIT dataset [7] (as in [1]) as an example. You can also use a noise dataset of your choice in a similar way.
 
