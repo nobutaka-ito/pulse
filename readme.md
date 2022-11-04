@@ -3,7 +3,9 @@
   <img alt="license" src="https://img.shields.io/github/license/nobutaka-ito/pulse">
 </a>
 
-This code is a Pytorch implementation of *PU learning for audio signal enhancement (PULSE)*, a method for audio signal enhancement (SE) proposed in ["Audio signal enhancement with learning from positive and unlabelled data"](https://arxiv.org/abs/2210.15143) [1]. With this code, you can run speech enhancement experiments using PULSE and train and evaluate speech enhancement models from scratch. This code also includes implementations of ordinary supervised learning and mixture invariant training (MixIT) [3] as baseline methods. If you find this code useful, please cite [1]:
+This code is a Pytorch implementation of *PU learning for audio signal enhancement (PULSE)*, a method for audio signal enhancement (SE) proposed in ["Audio signal enhancement with learning from positive and unlabelled data"](https://arxiv.org/abs/2210.15143) [1]. PULSE is based on a weakly supervised learning framework called *learning from positive and unlabelled data (PU learning)* [2]. 
+
+With this code, you can run speech enhancement experiments using PULSE and train and evaluate speech enhancement models from scratch. This code also includes implementations of ordinary supervised learning and mixture invariant training (MixIT) [3] as baseline methods. If you find this code useful, please cite [1]:
 ```
 @misc{Ito2022arXiv10PULSE,
   doi = {10.48550/ARXIV.2210.15143},
@@ -18,7 +20,7 @@ This code is a Pytorch implementation of *PU learning for audio signal enhanceme
 ## What's PULSE?
 SE is the task of extracting a desired class of sounds (a "clean signal") while suppressing the other classes of sounds ("noise") from an observed mixture of them (a "noisy signal"). Applications include automatic speech recognition (ASR), music information retrieval, and sound event detection. Although the mainstream SE approach is supervised learning, it is physically impossible to record required parallel training data consisting of both noisy signals and the corresponding clean signals. These data are thus synthesised in practice, which can severely degrade real-world performance due to a data mismatch. 
 
-In contrast, PULSE enables SE using non-parallel training data consisting of noisy signals and noise, which can be easily recorded in the real world. PULSE is based on a weakly supervised learning framework called *learning from positive and unlabelled data (PU learning)* [2].
+In contrast, PULSE enables SE using non-parallel training data consisting of noisy signals and noise, which can be easily recorded in the real world. 
 
 
 ## Set up
