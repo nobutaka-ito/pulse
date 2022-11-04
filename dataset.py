@@ -22,6 +22,8 @@ class MixIT_dev_data(torch.utils.data.Dataset):
         noise_stft: The noise example in the short-time Fourier transform domain.
         noisy_stft: The noisy speech example in the short-time Fourier transform domain.
     """
+    
+    # Note for future updates: This is unnecessary and can be merged with PU_dev_data.
 
     def __init__(self, frame_len, wav_len, fname, clean_path, noise_path):
 
