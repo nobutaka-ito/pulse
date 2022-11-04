@@ -1,6 +1,27 @@
 import torch, torchaudio
 
 class MixIT_dev_data(torch.utils.data.Dataset):
+    
+    """
+    A dataset class for the development set for MixIT, where each example is a triplet consisting of  
+    noisy speech, noise, and their sum. 
+
+    Args:
+        frame_len: The frame length for the short-time Fourier transform.
+        wav_len: The waveform length of each audio clip.
+        fname: The path to the configuration file for the development set.
+        clean_path: The directory path of the clean speech dataset.
+        noise_path: The directory path of the noise dataset.
+
+    Returns:
+        feat: The power-law compressed magnitude spectrogram of the sum of a noisy speech example and 
+            a noise example in the short-time Fourier transform domain. (NB: This is unnecessary as it
+            can be computed from mixture_stft and is to be removed in future updates.)
+        mixture_stft: The sum of the noisy speech example and the noise example in the short-time 
+            Fourier transform domain.
+        noise_stft: The noise example in the short-time Fourier transform domain.
+        noisy_stft: The noisy speech example in the short-time Fourier transform domain.
+    """
 
     def __init__(self, frame_len, wav_len, fname, clean_path, noise_path):
 
@@ -84,6 +105,30 @@ class MixIT_dev_data(torch.utils.data.Dataset):
 
 
 class PU_dev_data(torch.utils.data.Dataset):
+        
+    """
+    A dataset class for the development set for PULSE, where each example is either noisy speech or 
+    noise. The examples with even indices are noisy speech examples, which are considered to be 
+    unlabelled data. The examples with odd indices are noise examples, which are considered to be 
+    positive examples.
+
+    Args:
+        frame_len: The frame length for the short-time Fourier transform.
+        wav_len: The waveform length of each audio clip.
+        fname: The path to the configuration file for the development set.
+        clean_path: The directory path of the clean speech dataset.
+        noise_path: The directory path of the noise dataset.
+
+    Returns:
+        feat: The power-law compressed magnitude spectrogram of mixture_stft. (NB: This is unnecessary 
+            as it can be computed from mixture_stft and is to be removed in future updates.)
+        mask: A binary mask indicating whether each time-frequency component is a positive example (1)
+            or an unlabelled example (0). For the even indices, this is a matrix of all zeros. For the 
+            odd indices, this is a matrix of all ones. 
+        mixture_stft: Noisy speech or noise in the short-time Fourier transform domain.
+        mixture_stft: This is a dummy variable and not used. (This is used just to make sure that 
+            there are four outputs for the sake of consistency with other dataset classes.)
+    """
 
     def __init__(self, frame_len, wav_len, fname, clean_path, noise_path):
 
@@ -179,6 +224,31 @@ class PU_dev_data(torch.utils.data.Dataset):
 
 class PN_data(torch.utils.data.Dataset):
 
+    """
+    A dataset class for parallel data consisting of noisy speech and the corresponding clean speech. 
+    This is used in supervised learning or for the validation/test set for PULSE and MixIT.
+
+    Args:
+        partition: The data partition. The returns differ depending on whether partition == 'train'.
+        frame_len: The frame length for the short-time Fourier transform.
+        wav_len: The waveform length of each audio clip.
+        fname: The path to the configuration file.
+        clean_path: The directory path of the clean speech dataset.
+        noise_path: The directory path of the noise dataset.
+
+    Returns:
+        feat: The power-law compressed magnitude spectrogram of mixture_stft. (NB: This is unnecessary 
+            as it can be computed from mixture_stft and is to be removed in future updates.)
+        mask (only in the case "partition == 'train'"): This is a dummy variable and not used. (This 
+            is used just to make sure that there are four outputs for the sake of consistency with 
+            other dataset classes.)
+        mixture_stft: Noisy speech in the short-time Fourier transform domain.
+        clean_stft (only in the case "partition == 'train'"): Clean speech in the short-time Fourier 
+            transform domain.
+        mixture_wav (only in the case "partition != 'train'"): Noisy speech in the time domain.
+        clean_wav (only in the case "partition != 'train'"): Clean speech in the time domain.
+    """
+        
     def __init__(self, partition, frame_len, wav_len, fname, clean_path, noise_path):
 
         super().__init__()
@@ -267,6 +337,30 @@ class PN_data(torch.utils.data.Dataset):
 def load_data(max_batch_size, world_size, rank, method, frame_len, wav_len, 
               dev_fname, val_fname, test_fname, clean_path, noise_path):
 
+    """
+    Creates data loaders for the development, the validation, and the test sets.
+
+    Args:
+        max_batch_size: The batch size.
+        world_size: The world size. (For single-GPU training, world_size == 1.)
+        rank: The rank of the device. (For single GPU training, rank == 0.)
+        method: The method for speech enhancement, which is 'PU' for PULSE, 'PN' for supervised 
+            learning, and 'MixIT' for MixIT.
+        frame_len: The frame length for the short-time Fourier transform.
+        wav_len: The waveform length of each audio clip.
+        dev_fname: The path to the configuration file for the development set.
+        val_fname: The path to the configuration file for the validation set.
+        test_fname: The path to the configuration file for the test set.
+        clean_path: The directory path of the clean speech dataset.
+        noise_path: The directory path of the noise dataset.
+        
+    Returns:
+        train_loader: The data loader for the development set.
+        val_loader: The data loader for the validation set.
+        test_loader: The data loader for the test set.
+        train_batch_size: This is unnecessary and is to be removed in future updates.
+    """
+    
     if method == 'PN':
         train_data = PN_data('train', frame_len, wav_len, dev_fname, clean_path, noise_path)
     elif method == 'MixIT':
