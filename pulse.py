@@ -12,7 +12,22 @@ if os.path.isfile('distributed.py'):
     
 @torch.no_grad()
 def enhance(mixture_stft, estmask, length, gpu, frame_len):
-
+    
+    """
+    Masking-based speech enhancement.
+    
+    Args:
+        mixture_stft: The observed noisy speech in the short-time Fourier transform domain.
+        estmask: The estimated mask to be used for masking-based speech enhancement.
+        length: The waveform length of the enhanced speech.
+        gpu: The GPU used.
+        frame_len: The frame length for the short-time Fourier transform.
+        
+    Returns:
+        estwav: The enhanced speech in the time domain.
+        est_stft: The enhanced speech in the short-time Fourier transform domain.
+    """
+    
     est_stft = mixture_stft * estmask
     shape = est_stft.size()
     est_stft = est_stft.reshape(-1, shape[-2], shape[-1])
@@ -27,6 +42,22 @@ def enhance(mixture_stft, estmask, length, gpu, frame_len):
 @torch.no_grad()
 def evaluate(model, test_loader, gpu, method, frame_len):
 
+    """
+    Evaluate a speech enhancement model on the test set in terms of the improvement in the 
+    scale-invariant signal-to-noise ratio (SI-SNRi).
+    
+    Args:
+        model: A speech enhancement model to be evaluated.
+        test_loader: The data loader for the test set.
+        gpu: The GPU used.
+        method: The speech enhancement method, which is 'PU' for PULSE, 'PN' for supervised 
+            learning, and 'MixIT' for mixture invariant training (MixIT).
+        frame_len: The frame length for the short-time Fourier transform.
+        
+    Returns:
+        si_sdri_ave: The SI-SNRi of the model on the test set, averaged over the whole test set.
+    """
+    
     si_sdri_ave = torch.Tensor([0.]).to(gpu)    
     data_size = torch.Tensor([0.]).to(gpu)
 
@@ -58,6 +89,25 @@ def evaluate(model, test_loader, gpu, method, frame_len):
 
 def train_MixIT(model, optimizer, train_loader, val_loader, epochs, gpu, world_size, rank, frame_len):
 
+    """
+    Train a speech enhancement model using mixture invariant training (MixIT). The model checkpoint 
+    with the maximum validation SI-SNRi is stored in 'pulse/model_MixIT.pth'.
+    
+    Args:
+        model: The speech enhancement model to be trained.
+        optimizer: The optimiser used.
+        train_loader: The data loader for the development set.
+        val_loader: The data loader for the validation set.
+        epochs: The number of epochs.
+        gpu: The gpu used.
+        world_size: The world size (world_size == 1 for single-GPU training).
+        rank: The rank of the device (rank == 0 for single-GPU training).
+        frame_len: The frame length for the short-time Fourier transform.
+        
+    Returns:
+        max_si_sdri: The maximum validation SI-SNRi.
+    """
+    
     history = {}
     history['train_loss'], history['val_si_sdri'] = [], []
     max_si_sdri = torch.tensor(float('-inf')).to(gpu)
@@ -129,6 +179,35 @@ def train_MixIT(model, optimizer, train_loader, val_loader, epochs, gpu, world_s
 def train(model, optimizer, train_loader, val_loader, epochs, gpu, world_size, rank, beta, gamma, method, 
           frame_len, p=1.0, mode = 'nn', prior=.7):
 
+    """
+    Train a speech enhancement model. The model checkpoint with the maximum validation SI-SNRi is stored 
+    in 'model_*.pth'.
+    
+    Args:
+        model: The speech enhancement model to be trained.
+        optimizer: The optimiser used.
+        train_loader: The data loader for the development set.
+        val_loader: The data loader for the validation set.
+        epochs: The number of epochs.
+        gpu: The gpu used.
+        world_size: The world size (world_size == 1 for single-GPU training).
+        rank: The rank of the device (rank == 0 for single-GPU training).
+        beta: The beta parameter for learning from positive and unlabelled data (PU learning) using a 
+            non-negative empirical risk
+        gamma: The gamma parameter for PU learning using a non-negative empirical risk
+        method: The speech enhancement method, which is 'PU' for PULSE and 'PN' for supervised 
+            learning.
+        frame_len: The frame length for the short-time Fourier transform.
+        p: The exponent in the weight for the weighted sigmoid loss, which equals 1.0 for weighting
+            by the magnitude spectrogram and 0.0 for no weighting.
+        mode: The type of the empirical risk for PU learning, which is 'nn' for the non-negative
+            empirical risk and 'unbiased' for the unbiased one.
+        prior: The class prior for the positive class.
+        
+    Returns:
+        max_si_sdri: The maximum validation SI-SNRi.
+    """
+    
     history = {}
     history['train_loss'], history['val_si_sdri'] = [], []
     max_si_sdri = torch.tensor(float('-inf')).to(gpu)
