@@ -96,7 +96,7 @@ def train_MixIT(model, optimizer, train_loader, val_loader, epochs, gpu, world_s
     Args:
         model: The speech enhancement model to be trained.
         optimizer: The optimiser used.
-        train_loader: The data loader for the development set.
+        train_loader: The data loader for the training set.
         val_loader: The data loader for the validation set.
         epochs: The number of epochs.
         gpu: The gpu used.
@@ -186,7 +186,7 @@ def train(model, optimizer, train_loader, val_loader, epochs, gpu, world_size, r
     Args:
         model: The speech enhancement model to be trained.
         optimizer: The optimiser used.
-        train_loader: The data loader for the development set.
+        train_loader: The data loader for the training set.
         val_loader: The data loader for the validation set.
         epochs: The number of epochs.
         gpu: The gpu used.
@@ -358,7 +358,7 @@ def main():
         print('loading data ...')
     train_loader, val_loader, test_loader, _\
     = load_data(args.batch_size, world_size, rank, args.method, args.frame_len, args.wav_len, 
-                args.dev_fname, args.val_fname, args.test_fname, args.clean_path, args.noise_path)
+                args.train_fname, args.val_fname, args.test_fname, args.clean_path, args.noise_path)
 
     # Construct the CNN
     model = make_CNN(args.blocks, args.channels, args.droprate, args.fcblocks, args.method).to(gpu)
