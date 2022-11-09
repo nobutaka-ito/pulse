@@ -1,15 +1,15 @@
 import torch, torchaudio
 
-class MixIT_dev_data(torch.utils.data.Dataset):
+class MixIT_train_data(torch.utils.data.Dataset):
     
     """
-    A dataset class for the development set for MixIT, where each example is a triplet consisting of  
+    A dataset class for the training set for MixIT, where each example is a triplet consisting of  
     noisy speech, noise, and their sum. 
 
     Args:
         frame_len: The frame length for the short-time Fourier transform.
         wav_len: The waveform length of each audio clip.
-        fname: The path to the configuration file for the development set.
+        fname: The path to the configuration file for the training set.
         clean_path: The directory path of the clean speech dataset.
         noise_path: The directory path of the noise dataset.
 
@@ -23,7 +23,7 @@ class MixIT_dev_data(torch.utils.data.Dataset):
         noisy_stft: The noisy speech example in the short-time Fourier transform domain.
     """
     
-    # Note for future updates: This is unnecessary and can be merged with PU_dev_data.
+    # Note for future updates: This is unnecessary and can be merged with PU_train_data.
 
     def __init__(self, frame_len, wav_len, fname, clean_path, noise_path):
 
@@ -106,10 +106,10 @@ class MixIT_dev_data(torch.utils.data.Dataset):
         return feat, mixture_stft[None, :, :], noise_stft[None, :, :], noisy_stft[None, :, :]
 
 
-class PU_dev_data(torch.utils.data.Dataset):
+class PU_train_data(torch.utils.data.Dataset):
         
     """
-    A dataset class for the development set for PULSE, where each example is either noisy speech or 
+    A dataset class for the training set for PULSE, where each example is either noisy speech or 
     noise. The examples with even indices are noisy speech examples, which are considered to be 
     unlabelled data. The examples with odd indices are noise examples, which are considered to be 
     positive examples.
@@ -117,7 +117,7 @@ class PU_dev_data(torch.utils.data.Dataset):
     Args:
         frame_len: The frame length for the short-time Fourier transform.
         wav_len: The waveform length of each audio clip.
-        fname: The path to the configuration file for the development set.
+        fname: The path to the configuration file for the training set.
         clean_path: The directory path of the clean speech dataset.
         noise_path: The directory path of the noise dataset.
 
@@ -337,10 +337,10 @@ class PN_data(torch.utils.data.Dataset):
 
 
 def load_data(max_batch_size, world_size, rank, method, frame_len, wav_len, 
-              dev_fname, val_fname, test_fname, clean_path, noise_path):
+              train_fname, val_fname, test_fname, clean_path, noise_path):
 
     """
-    Creates data loaders for the development, the validation, and the test sets.
+    Creates data loaders for the training, the validation, and the test sets.
 
     Args:
         max_batch_size: The batch size.
@@ -350,25 +350,25 @@ def load_data(max_batch_size, world_size, rank, method, frame_len, wav_len,
             learning, and 'MixIT' for MixIT.
         frame_len: The frame length for the short-time Fourier transform.
         wav_len: The waveform length of each audio clip.
-        dev_fname: The path to the configuration file for the development set.
+        train_fname: The path to the configuration file for the training set.
         val_fname: The path to the configuration file for the validation set.
         test_fname: The path to the configuration file for the test set.
         clean_path: The directory path of the clean speech dataset.
         noise_path: The directory path of the noise dataset.
         
     Returns:
-        train_loader: The data loader for the development set.
+        train_loader: The data loader for the training set.
         val_loader: The data loader for the validation set.
         test_loader: The data loader for the test set.
         train_batch_size: This is unnecessary and is to be removed in future updates.
     """
     
     if method == 'PN':
-        train_data = PN_data('train', frame_len, wav_len, dev_fname, clean_path, noise_path)
+        train_data = PN_data('train', frame_len, wav_len, train_fname, clean_path, noise_path)
     elif method == 'MixIT':
-        train_data = MixIT_dev_data(frame_len, wav_len, dev_fname, clean_path, noise_path)
+        train_data = MixIT_train_data(frame_len, wav_len, train_fname, clean_path, noise_path)
     else:
-        train_data = PU_dev_data(frame_len, wav_len, dev_fname, clean_path, noise_path)
+        train_data = PU_train_data(frame_len, wav_len, train_fname, clean_path, noise_path)
     val_data = PN_data('val', frame_len, wav_len, val_fname, clean_path, noise_path)
     test_data = PN_data('test', frame_len, wav_len, test_fname, clean_path, noise_path)
 
