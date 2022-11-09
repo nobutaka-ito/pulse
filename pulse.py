@@ -320,7 +320,7 @@ def get_args():
     parser.add_argument("--droprate", type = float, default = 0.2, help = 'The dropout rate.')
     parser.add_argument("--fcblocks", type = int, default = 0, help = 'A hyperparameter related to the kernel size in the convolutional neural network.')
     parser.add_argument("--method", type = str, default = 'PU', help = 'The audio signal enhancement method ("PU", "PN", or "MixIT").')
-    parser.add_argument("--dev_fname", type = str, default = 'voicebank_dev_set.txt', help = 'The path to the configuration file for the development set.')
+    parser.add_argument("--train_fname", type = str, default = 'voicebank_train_set.txt', help = 'The path to the configuration file for the training set.')
     parser.add_argument("--val_fname", type = str, default = 'voicebank_val_set.txt', help = 'The path to the configuration file for the validation set.')
     parser.add_argument("--test_fname", type = str, default = 'voicebank_test_set.txt', help = 'The path to the configuration file for the test set.')
     parser.add_argument("--clean_path", type = str, default = 'voicebank', help = 'The directory path for the clean speech dataset.')
