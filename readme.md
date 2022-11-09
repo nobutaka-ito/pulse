@@ -82,9 +82,9 @@ Here we explain how to run an experiment using a clean speech dataset of your ow
 Put TIMIT in `pulse/TIMIT/`, which you need to purchase from [LDC](https://catalog.ldc.upenn.edu/LDC93S1). If you wish to use a speech dataset other than TIMIT (or a noise dataset of your choice), put it in `pulse/<dataset name>/`, where `<dataset name>` should be replaced by the name of the dataset.
 
 ### Prepare configuration files
-Configuration files specify the information necessary to synthesise speech enhancement datasets from the speech and the noise datasets, including how to partition data into development, validation, and test sets. For the default configuration using TIMIT and DEMAND, we already prepared `pulse/TIMIT_dev_set.txt`, `pulse/TIMIT_val_set.txt`, and `pulse/TIMIT_test_set.txt` for the development, the validation, and the test sets, respectively. If you wish to use a speech dataset other than TIMIT (or a noise dataset of your choice), you will need to create configuration files by yourself.
+Configuration files specify the information necessary to synthesise speech enhancement datasets from the speech and the noise datasets, including how to partition data into training, validation, and test sets. For the default configuration using TIMIT and DEMAND, we already prepared `pulse/TIMIT_train_set.txt`, `pulse/TIMIT_val_set.txt`, and `pulse/TIMIT_test_set.txt` for the training, the validation, and the test sets, respectively. If you wish to use a speech dataset other than TIMIT (or a noise dataset of your choice), you will need to create configuration files by yourself.
 
-Each line of the configuration file for the development set (e.g., `pulse/TIMIT_dev_set.txt`) specifies the information necessary to synthesise an example in the development set (i.e., a noisy speech example and a noise example in PULSE and MixIT and a noisy speech example and the corresponding clean speech example in supervised learning). Specifically, each line consists of the following six entries separated by a space: 
+Each line of the configuration file for the training set (e.g., `pulse/TIMIT_train_set.txt`) specifies the information necessary to synthesise an example in the training set (i.e., a noisy speech example and a noise example in PULSE and MixIT and a noisy speech example and the corresponding clean speech example in supervised learning). Specifically, each line consists of the following six entries separated by a space: 
 1. the file path for the clean speech for generating a noisy signal example,
 1. the file path for the noise for generating a noisy signal example,
 1. the starting time of the noise excerpt for generating a noisy signal example,
@@ -99,39 +99,39 @@ Here, the information in 5. and 6. is ignored in supervised learning. The config
 ### How data are generated
 Here is how speech enhancement datasets are generated using the speech and the noise datasets and the information in the configuration files. PULSE and MixIT use non-parallel training data consisting of noisy signals and noise, while supervised learning uses parallel training data consisting of noisy signals and the corresponding clean signals. The validation and the test sets are such parallel data in all methods. 
 
-Each example in the development set for PULSE and MixIt is generated according to the following procedure:
+Each example in the training set for PULSE and MixIt is generated according to the following procedure:
 1. Generate a noisy signal example by excerpting a noise segment from the specified noise file and mix it with the specified clean speech at the specified SNR.
 1. Extract a noise example from the specified noise file starting from the specified starting time.
 
-The development set for supervised learning and the validation/test set for all methods are the same except that 2. is omitted.
+The training set for supervised learning and the validation/test set for all methods are the same except that 2. is omitted.
 
 ### Run an experiment
 The following commands will run an experiment with TIMIT. 
 
 ```
 # PULSE
-python pulse.py --method 'PU' --lr_per_GPU 0.000037 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT'  --blocks 4 --fcblocks 1 --prior 0.7 
+python pulse.py --method 'PU' --lr_per_GPU 0.000037 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT'  --blocks 4 --fcblocks 1 --prior 0.7 
 
 # Supervised learning
-python pulse.py --method 'PN' --lr_per_GPU 0.0002 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT'  --blocks 4 --fcblocks 0 --prior 0.7
+python pulse.py --method 'PN' --lr_per_GPU 0.0002 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT'  --blocks 4 --fcblocks 0 --prior 0.7
 
 # MixIT
-python pulse.py --method 'MixIT' --lr_per_GPU 0.000034 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT'  --blocks 4 --fcblocks 0 --prior 0.7
+python pulse.py --method 'MixIT' --lr_per_GPU 0.000034 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT'  --blocks 4 --fcblocks 0 --prior 0.7
 ```
 
-Here, the options `dev_fname`, `val_fname`, and `test_fname` specify the paths to the configuration files and the option `--clean_path` specifies the directory path of the clean speech dataset (i.e., TIMIT here). (If you also wish to use a noise dataset of your choice, you will also need to specify the directory path of the noise dataset using the option `--noise_path`.) The option `--fcblocks` is a hyperparameter related to the CNN architecture and `prior` is a hyperparameter in PU learning (specifically the class prior for the positive class), which have already been tuned using the SI-SNRi on the validation set.
+Here, the options `train_fname`, `val_fname`, and `test_fname` specify the paths to the configuration files and the option `--clean_path` specifies the directory path of the clean speech dataset (i.e., TIMIT here). (If you also wish to use a noise dataset of your choice, you will also need to specify the directory path of the noise dataset using the option `--noise_path`.) The option `--fcblocks` is a hyperparameter related to the CNN architecture and `prior` is a hyperparameter in PU learning (specifically the class prior for the positive class), which have already been tuned using the SI-SNRi on the validation set.
 
 ## Multi-node processing
 This code supports multi-node data-parallel distributed training using `torch.nn.parallel.DistributedDataParallel` and [Slurm](https://slurm.schedmd.com/documentation.html). Here we show an example of using three NVIDIA DGX nodes with eight A100 GPUs each (i.e., 24 GPUs in total). The options for Slurm `srun` should be changed according to your cluster configuration and `<partition name>` should be replaced with your partition name. (For example, if your nodes are `node[01-03]`, `<partition name>` is `node`.)
 ```
 # PULSE
-srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --method 'PU' --lr_per_GPU 0.000037 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 1 --prior 0.7
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --method 'PU' --lr_per_GPU 0.000037 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 1 --prior 0.7
 
 # Supervised learning
-srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --method 'PN' --lr_per_GPU 0.0002 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 0 --prior 0.7
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --method 'PN' --lr_per_GPU 0.0002 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 0 --prior 0.7
 
 # MixIT
-srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --method 'MixIT' --lr_per_GPU 0.000034 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 0 --prior 0.7
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --method 'MixIT' --lr_per_GPU 0.000034 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 0 --prior 0.7
 ```
 You need to pass the options `--dist` and `--prefix` to pulse.py, where `--dist` is a flag and `--prefix` specifies the partition name.
 
@@ -139,13 +139,13 @@ You need to pass the options `--dist` and `--prefix` to pulse.py, where `--dist`
 ### --p
 The option `--p` specifies the exponent for the weight in the weighted sigmoid loss. For example, it reduces to the unweighted sigmoid loss [8] with `--p .0` (as in an ablation study in [1]).
 ```
-srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --p 0.0 --method 'PU' --lr_per_GPU 0.000037 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 1 --prior 0.7
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --p 0.0 --method 'PU' --lr_per_GPU 0.000037 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 1 --prior 0.7
 ```
 
 ### --mode
 The option `--mode` specifies the type of the empirical risk in PU learning (`"nn"` or `"unbiased"`). The default value is `--mode "nn"`, corresponding to the non-negative empirical risk in [8]. `--mode "unbiased"` corresponds to the unbiased empirical risk [2] (as in an ablation study in [1]).
 ```
-srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --mode 'unbiased' --method 'PU' --lr_per_GPU 0.000037 --dev_fname 'TIMIT_dev_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 1 --prior 0.7
+srun -p <partition name> -N 3 --ntasks-per-node 8 --gpus-per-node 8 --cpus-per-task 10 --hint nomultithread python pulse.py --dist --prefix '<partition name>' --mode 'unbiased' --method 'PU' --lr_per_GPU 0.000037 --train_fname 'TIMIT_train_set.txt' --val_fname 'TIMIT_val_set.txt' --test_fname 'TIMIT_test_set.txt' --clean_path 'TIMIT' --blocks 4 --fcblocks 1 --prior 0.7
 ```
 
 ### Other options
