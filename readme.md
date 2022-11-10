@@ -71,7 +71,7 @@ Here we explain how to run an experiment using a clean speech dataset of your ow
 Put TIMIT in `pulse/TIMIT/`, which you need to purchase from [LDC](https://catalog.ldc.upenn.edu/LDC93S1). If you wish to use a speech dataset other than TIMIT (or a noise dataset of your choice), put it in `pulse/<dataset name>/`, where `<dataset name>` should be replaced by the name of the dataset.
 
 ### Prepare configuration files
-Configuration files include the information necessary to synthesise speech enhancement datasets from the speech and the noise datasets, including how to partition data into training, validation, and test sets. For the current example using TIMIT and DEMAND, we already prepared `pulse/TIMIT_train_set.txt`, `pulse/TIMIT_val_set.txt`, and `pulse/TIMIT_test_set.txt` for the training, the validation, and the test sets, respectively. However, if you wish to use a speech dataset other than TIMIT (or the default one [4]) or a noise dataset of your choice, you will need to create configuration files by yourself.
+Configuration files include the information necessary to synthesise speech enhancement datasets from the speech and the noise datasets, including how to partition data into training, validation, and test sets. For the current example using TIMIT and DEMAND, we already prepared `pulse/TIMIT_train_set.txt`, `pulse/TIMIT_val_set.txt`, and `pulse/TIMIT_test_set.txt` for the training, the validation, and the test sets, respectively. However, if you wish to use a speech dataset other than TIMIT (or the default one [4]) or a noise dataset of your choice, you will need to create configuration files by yourself. See `create_config_files.py` for a sample program for generating configuration files, which was used for generating `pulse/*set.txt` in this repository.
 
 Each line of a configuration file for the training set (e.g., `pulse/TIMIT_train_set.txt`) includes the information necessary to synthesise a training example (i.e., a noisy speech example and a noise example in PULSE and MixIT and a noisy speech example and the corresponding clean speech example in supervised learning). Specifically, each line consists of the following six entries separated by a space: 
 1. the file path for the clean speech for generating a noisy signal example,
@@ -149,6 +149,7 @@ For other options, see help by `python pulse.py --help`.
 - `distributed.py` is used for distributed training.
 - `download.sh` is used for downloading speech and noise datasets.
 - `*_set.txt` are configuration files and used for generating speech enhancement datasets.
+- `create_config_files.py` is a sample program for generating configuration files.
 
 ## Citation
 If you find this code useful, please cite [1]:
