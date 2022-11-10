@@ -10,8 +10,8 @@ class MixIT_train_data(torch.utils.data.Dataset):
         frame_len: The frame length for the short-time Fourier transform.
         wav_len: The waveform length of each audio clip.
         fname: The path to the configuration file for the training set.
-        clean_path: The directory path of the clean speech dataset.
-        noise_path: The directory path of the noise dataset.
+        clean_path: The directory path of the clean speech dataset. (not used)
+        noise_path: The directory path of the noise dataset. (not used)
 
     Returns:
         feat: The power-law compressed magnitude spectrogram of the sum of a noisy speech example and 
@@ -54,17 +54,17 @@ class MixIT_train_data(torch.utils.data.Dataset):
         return len(self.clean_fnames)
 
     def __getitem__(self, idx):
-        noise_wav, _ = torchaudio.load(self.noise_path + '/' + self.noise_fnames[idx], frame_offset = int(16000 * self.start_times[idx]), 
+        noise_wav, _ = torchaudio.load(self.noise_fnames[idx], frame_offset = int(16000 * self.start_times[idx]), 
                                        num_frames = self.wav_len)
         noise_wav = (noise_wav - torch.mean(noise_wav)) / torch.std(noise_wav)
         noise_wav = torch.squeeze(noise_wav)
 
-        noise_wav2, _ = torchaudio.load(self.noise_path + '/' + self.noise_fnames2[idx], frame_offset = int(16000 * self.start_times2[idx]), 
+        noise_wav2, _ = torchaudio.load(self.noise_fnames2[idx], frame_offset = int(16000 * self.start_times2[idx]), 
                                         num_frames = self.wav_len)
         noise_wav2 = (noise_wav2 - torch.mean(noise_wav2)) / torch.std(noise_wav2)
         noise_wav2 = torch.squeeze(noise_wav2)
 
-        clean_wav, sfreq = torchaudio.load(self.clean_path + '/' + self.clean_fnames[idx])
+        clean_wav, sfreq = torchaudio.load(self.clean_fnames[idx])
         if sfreq != 16000:
             resampler = torchaudio.transforms.Resample(sfreq, 16000)
             clean_wav = resampler(clean_wav)
@@ -118,8 +118,8 @@ class PU_train_data(torch.utils.data.Dataset):
         frame_len: The frame length for the short-time Fourier transform.
         wav_len: The waveform length of each audio clip.
         fname: The path to the configuration file for the training set.
-        clean_path: The directory path of the clean speech dataset.
-        noise_path: The directory path of the noise dataset.
+        clean_path: The directory path of the clean speech dataset. (not used)
+        noise_path: The directory path of the noise dataset. (not used)
 
     Returns:
         feat: The power-law compressed magnitude spectrogram of mixture_stft. (NB: This is unnecessary 
@@ -163,7 +163,7 @@ class PU_train_data(torch.utils.data.Dataset):
     def __getitem__(self, idx):
 
         if idx % 2 == 1: # The examples with odd indices are noises (considered to be positive examples)
-            noise_wav, _ = torchaudio.load(self.noise_path + '/' + self.noise_fnames[idx//2], frame_offset = int(16000 * self.start_times[idx//2]), 
+            noise_wav, _ = torchaudio.load(self.noise_fnames[idx//2], frame_offset = int(16000 * self.start_times[idx//2]), 
                                            num_frames = self.wav_len)
             noise_wav = (noise_wav - torch.mean(noise_wav)) / torch.std(noise_wav)
             noise_wav = torch.squeeze(noise_wav)
@@ -184,13 +184,13 @@ class PU_train_data(torch.utils.data.Dataset):
             clean_wav = torch.zeros(mixture_wav.size(), dtype = torch.float32)
 
         else: # The examples with even indices are noisy speeches (considered to be unlabelled examples)
-            noise_wav, _ = torchaudio.load(self.noise_path + '/' + self.noise_fnames2[idx//2], frame_offset = int(16000 * self.start_times2[idx//2]), 
+            noise_wav, _ = torchaudio.load(self.noise_fnames2[idx//2], frame_offset = int(16000 * self.start_times2[idx//2]), 
                                             num_frames = self.wav_len)
             noise_wav = (noise_wav - torch.mean(noise_wav)) / torch.std(noise_wav)
             noise_wav = torch.squeeze(noise_wav)
 
             # load clean speech 
-            clean_wav, sfreq = torchaudio.load(self.clean_path + '/' + self.clean_fnames[idx//2])
+            clean_wav, sfreq = torchaudio.load(self.clean_fnames[idx//2])
             if sfreq != 16000:
                 resampler = torchaudio.transforms.Resample(sfreq, 16000)
                 clean_wav = resampler(clean_wav)
@@ -235,8 +235,8 @@ class PN_data(torch.utils.data.Dataset):
         frame_len: The frame length for the short-time Fourier transform.
         wav_len: The waveform length of each audio clip.
         fname: The path to the configuration file.
-        clean_path: The directory path of the clean speech dataset.
-        noise_path: The directory path of the noise dataset.
+        clean_path: The directory path of the clean speech dataset. (not used)
+        noise_path: The directory path of the noise dataset. (not used)
 
     Returns:
         feat: The power-law compressed magnitude spectrogram of mixture_stft. (NB: This is unnecessary 
@@ -279,12 +279,12 @@ class PN_data(torch.utils.data.Dataset):
     def __getitem__(self, idx):
 
         # load noise
-        noise_wav, _ = torchaudio.load(self.noise_path + '/' + self.noise_fnames[idx], frame_offset = int(16000 * self.start_times[idx]), 
+        noise_wav, _ = torchaudio.load(self.noise_fnames[idx], frame_offset = int(16000 * self.start_times[idx]), 
                                        num_frames = self.wav_len)
         noise_wav = (noise_wav - torch.mean(noise_wav)) / torch.std(noise_wav)
         noise_wav = torch.squeeze(noise_wav)
 
-        clean_wav, sfreq = torchaudio.load(self.clean_path + '/' + self.clean_fnames[idx])
+        clean_wav, sfreq = torchaudio.load(self.clean_fnames[idx])
         if sfreq != 16000:
             resampler = torchaudio.transforms.Resample(sfreq, 16000)
             clean_wav = resampler(clean_wav)
@@ -353,8 +353,8 @@ def load_data(max_batch_size, world_size, rank, method, frame_len, wav_len,
         train_fname: The path to the configuration file for the training set.
         val_fname: The path to the configuration file for the validation set.
         test_fname: The path to the configuration file for the test set.
-        clean_path: The directory path of the clean speech dataset.
-        noise_path: The directory path of the noise dataset.
+        clean_path: The directory path of the clean speech dataset. (not used)
+        noise_path: The directory path of the noise dataset. (not used)
         
     Returns:
         train_loader: The data loader for the training set.
