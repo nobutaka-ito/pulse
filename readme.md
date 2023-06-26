@@ -1,4 +1,7 @@
 # PU learning for audio signal enhancement (PULSE)
+
+***News: This work received the Best Paper Award at ICASSP 2023!***
+
 <a href="https://github.com/nobutaka-ito/pulse/blob/master/LICENSE">
   <img alt="license" src="https://img.shields.io/github/license/nobutaka-ito/pulse">
 </a>
