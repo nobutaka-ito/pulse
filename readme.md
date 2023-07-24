@@ -6,7 +6,7 @@
   <img alt="license" src="https://img.shields.io/github/license/nobutaka-ito/pulse">
 </a>
 
-[!['Youtube']()]('https://www.youtube.com/watch?v=XTEIstNYerM')
+[![Youtube](http://img.youtube.com/vi/XTEIstNYerM/default.jpg)](https://www.youtube.com/watch?v=XTEIstNYerM)
 
 This code is a Pytorch implementation of *PU learning for audio signal enhancement (PULSE)*, a method for audio signal enhancement (SE) proposed in ["Audio signal enhancement with learning from positive and unlabelled data"](https://arxiv.org/abs/2210.15143) [1]. PULSE is based on a weakly supervised learning framework called *learning from positive and unlabelled data (PU learning)* [2]. 
 
